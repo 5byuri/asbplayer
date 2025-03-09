@@ -2433,16 +2433,23 @@ export default function SettingsForm({
                                 onChange={(event) =>
                                     handleSettingChanged('subtitleRegexFilterTextReplacement', event.target.value)
                                 }
-                            />
+                            >
+                                {supportedLanguages.map((s) => (
+                                    <MenuItem key={s} value={s}>      
+                                        {s}
+                                    </MenuItem>
+                                ))}
+
+                                </TextField>
                             <TextField
                                 select
                                 label={t('settings.language')}
                                 value={language}
                                 color="primary"
-                                onChange={(event) => handleSettingChanged('language', event.target.value)}
+                                onChange={(event) => handleSettingChanged('language', event.target.value)} //this is where the menu is that I need to change
                             >
                                 {supportedLanguages.map((s) => (
-                                    <MenuItem key={s} value={s}>
+                                    <MenuItem key={s} value={s}>      
                                         {s}
                                     </MenuItem>
                                 ))}
