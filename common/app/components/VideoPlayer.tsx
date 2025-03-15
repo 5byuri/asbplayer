@@ -185,49 +185,6 @@ const showingSubtitleHtml = (
     return wrappedText;
 };
 
-interface ShowingSubtitleProps {
-    subtitle: IndexedSubtitleModel;
-    videoRef: MutableRefObject<ExperimentalHTMLVideoElement | undefined>;
-    subtitleStyles: any;
-    imageBasedSubtitleScaleFactor: number;
-    className?: string;
-    onMouseOver: React.MouseEventHandler<HTMLDivElement>;
-}
-
-const ShowingSubtitle = ({
-    subtitle,
-    videoRef,
-    subtitleStyles,
-    imageBasedSubtitleScaleFactor,
-    className,
-    onMouseOver,
-}: ShowingSubtitleProps) => {
-    let content;
-
-    if (subtitle.textImage) {
-        content = (
-            <SubtitleTextImage
-                availableWidth={videoRef.current?.width ?? window.screen.availWidth}
-                subtitle={subtitle}
-                scale={imageBasedSubtitleScaleFactor}
-            />
-        );
-    } else {
-        const lines = subtitle.text.split('\n');
-        content = lines.map((line, index) => (
-            <p key={index} className="subtitle-line" style={subtitleStyles}>
-                {line}
-            </p>
-        ));
-    }
-
-    return (
-        <div className={className ? className : ''} onMouseOver={onMouseOver}>
-            {content}
-        </div>
-    );
-};
-
 interface CachedShowingSubtitleProps {
     index: number;
     domCache: OffscreenDomCache;
@@ -278,11 +235,15 @@ interface SubtitleContainerProps {
     children: React.ReactNode;
 }
 
-const SubtitleContainer = ({ subtitleSettings, alignment, baseOffset, children }: SubtitleContainerProps) => {
+const SubtitleContainer = React.forwardRef<HTMLDivElement, SubtitleContainerProps>(function SubtitleContainer(
+    { subtitleSettings, alignment, baseOffset, children }: SubtitleContainerProps,
+    ref
+) {
     const classes = useSubtitleContainerStyles();
 
     return (
         <div
+            ref={ref}
             className={classes.subtitleContainer}
             style={{
                 ...(alignment === 'bottom'
@@ -294,7 +255,7 @@ const SubtitleContainer = ({ subtitleSettings, alignment, baseOffset, children }
             {children}
         </div>
     );
-};
+});
 
 export interface SeekRequest {
     timestamp: number;
@@ -433,6 +394,8 @@ export default function VideoPlayer({
     const [trackCount, setTrackCount] = useState<number>(0);
     const [, forceRender] = useState<any>();
     const [mineIntervalStartTimestamp, setMineIntervalStartTimestamp] = useState<number>();
+    const mobileOverlayRef = useRef<HTMLDivElement>(null);
+    const bottomSubtitleContainerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         setMiscSettings(settings);
@@ -491,6 +454,10 @@ export default function VideoPlayer({
         playerChannel.playbackRate(video.playbackRate, false);
         playerChannel.currentTime(video.currentTime, false);
         forceRender({});
+
+        if (!video.paused) {
+            isPausedDueToHoverRef.current = false;
+        }
     }, [playerChannel]);
 
     const onErrorRef = useRef(onError);
@@ -1500,13 +1467,36 @@ export default function VideoPlayer({
         }
     }, [miscSettings.pauseOnHoverMode, playerChannel]);
 
-    const handleVideoMouseOver = useCallback(() => {
-        if (miscSettings.pauseOnHoverMode === PauseOnHoverMode.inAndOut && isPausedDueToHoverRef.current) {
-            playerChannel.play();
+    const inBetweenMobileOverlayAndBottomSubtitles = (e: React.MouseEvent<HTMLVideoElement>) => {
+        if (!mobileOverlayRef.current || !bottomSubtitleContainerRef.current) {
+            return;
         }
 
-        isPausedDueToHoverRef.current = false;
-    }, [miscSettings.pauseOnHoverMode, playerChannel]);
+        const mobileOverlayRect = mobileOverlayRef.current.getBoundingClientRect();
+        const subtitleContainerRect = bottomSubtitleContainerRef.current.getBoundingClientRect();
+        const bottom = mobileOverlayRect.y + mobileOverlayRect.height;
+        const top = subtitleContainerRect.y;
+        const left = Math.min(subtitleContainerRect.x, mobileOverlayRect.x);
+        const right = Math.max(
+            subtitleContainerRect.x + subtitleContainerRect.width,
+            mobileOverlayRect.x + mobileOverlayRect.width
+        );
+        return e.clientY <= bottom && e.clientY >= top && e.clientX >= left && e.clientX <= right;
+    };
+
+    const handleVideoMouseOver = useCallback(
+        (e: React.MouseEvent<HTMLVideoElement>) => {
+            if (
+                miscSettings.pauseOnHoverMode === PauseOnHoverMode.inAndOut &&
+                isPausedDueToHoverRef.current &&
+                !inBetweenMobileOverlayAndBottomSubtitles(e)
+            ) {
+                playerChannel.play();
+                isPausedDueToHoverRef.current = false;
+            }
+        },
+        [miscSettings.pauseOnHoverMode, playerChannel]
+    );
 
     const { lastControlType, setLastControlType } = useLastScrollableControlType({
         isMobile,
@@ -1580,6 +1570,7 @@ export default function VideoPlayer({
                 {alertMessage}
             </Alert>
             <MobileVideoOverlay
+                ref={mobileOverlayRef}
                 model={mobileOverlayModel()}
                 className={classes.mobileOverlay}
                 anchor={'bottom'}
@@ -1610,6 +1601,7 @@ export default function VideoPlayer({
             )}
             {bottomSubtitleElements.length > 0 && (
                 <SubtitleContainer
+                    ref={bottomSubtitleContainerRef}
                     alignment={'bottom'}
                     subtitleSettings={subtitleSettings}
                     baseOffset={baseBottomSubtitleOffset}
