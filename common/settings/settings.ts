@@ -25,6 +25,7 @@ export interface MiscSettings {
     readonly lastSubtitleOffset: number;
     readonly lastSelectedAnkiExportMode: AnkiExportMode;
     readonly tabName: string;
+    readonly regexPreset: string;
     readonly pauseOnHoverMode: PauseOnHoverMode;
 }
 

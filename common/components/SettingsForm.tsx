@@ -40,6 +40,7 @@ import {
     SubtitleListPreference,
     TextSubtitleSettings,
     changeForTextSubtitleSetting,
+    regexPresets,
     sortedAnkiFieldModels,
     textSubtitleSettingsAreDirty,
     textSubtitleSettingsForTrack,
@@ -888,6 +889,7 @@ export default function SettingsForm({
         tabName,
         subtitleRegexFilter,
         subtitleRegexFilterTextReplacement,
+        regexPreset,
         language,
         customAnkiFields,
         customAnkiFieldSettings,
@@ -2416,6 +2418,24 @@ export default function SettingsForm({
                                     onChange={(event) => handleSettingChanged('tabName', event.target.value)}
                                 />
                             )}
+
+                            <TextField
+                                label={t('settings.regexPreset')}
+                                select
+                                fullWidth
+                                value={regexPreset}
+                                color="primary"
+                                onChange={(event) =>
+                                    handleSettingChanged('regexPreset', event.target.value)
+                                }
+                            >
+                                {regexPresets.map((s) => (
+                                    <MenuItem key={s} value={s}>
+                                        {s}
+                                    </MenuItem>
+                                ))}
+
+                                </TextField>
                             <TextField
                                 label={t('settings.subtitleRegexFilter')}
                                 fullWidth
@@ -2426,6 +2446,7 @@ export default function SettingsForm({
                                 onChange={(event) => handleSettingChanged('subtitleRegexFilter', event.target.value)}
                             />
                             <TextField
+                                select
                                 label={t('settings.subtitleRegexFilterTextReplacement')}
                                 fullWidth
                                 value={subtitleRegexFilterTextReplacement}
@@ -2434,7 +2455,7 @@ export default function SettingsForm({
                                     handleSettingChanged('subtitleRegexFilterTextReplacement', event.target.value)
                                 }
                             >
-                                {supportedLanguages.map((s) => (
+                                {regexPresets.map((s) => (
                                     <MenuItem key={s} value={s}>      
                                         {s}
                                     </MenuItem>

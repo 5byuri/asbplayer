@@ -259,6 +259,7 @@
         "settings.subtitlePositionOffset": "Label for setting that controls subtitle position offset.",
         "settings.subtitleRegexFilter": "This setting defines a regular expression used to filter text of a subtitle file.",
         "settings.subtitleRegexFilterTextReplacement": "This setting defines the text with which to replace strings matched by the above regular expression.",
+        "settings.regexPreset": "This settings offers a predefined set of regex filters",
         "settings.subtitleShadowColor": "Label for setting that controls subtitle shadow color.",
         "settings.subtitleShadowThickness": "Label for setting that controls subtitle shadow thickness.",
         "settings.subtitleSize": "Setting that controls subtitle size.",
