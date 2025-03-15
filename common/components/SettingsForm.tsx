@@ -2439,14 +2439,14 @@ export default function SettingsForm({
                             <TextField
                                 label={t('settings.subtitleRegexFilter')}
                                 fullWidth
-                                value={subtitleRegexFilter}
+                                value={`${regexPreset === "Sound effects" ? "it works" : "" }` + subtitleRegexFilter}
                                 color="primary"
                                 error={!validRegex}
                                 helperText={validRegex ? undefined : 'Invalid regular expression'}
                                 onChange={(event) => handleSettingChanged('subtitleRegexFilter', event.target.value)}
                             />
                             <TextField
-                                select
+
                                 label={t('settings.subtitleRegexFilterTextReplacement')}
                                 fullWidth
                                 value={subtitleRegexFilterTextReplacement}
