@@ -196,6 +196,14 @@ interface SelectableSettingProps {
     onRemoval?: () => void;
 }
 
+function huansohn(input: string){
+    if (input === "Sound effects") { return "^-?[.+]$|^[♪♬#～〜]+$" }
+    if (input === "No preset"){return ""}
+    if (input === "furigana"){return "insert furigana"}
+
+}
+
+
 function SelectableSetting({
     label,
     value,
@@ -2439,7 +2447,7 @@ export default function SettingsForm({
                             <TextField
                                 label={t('settings.subtitleRegexFilter')}
                                 fullWidth
-                                value={`${regexPreset === "Sound effects" ? "it works" : "" }` + subtitleRegexFilter}
+                                value={huansohn(regexPreset)}
                                 color="primary"
                                 error={!validRegex}
                                 helperText={validRegex ? undefined : 'Invalid regular expression'}
