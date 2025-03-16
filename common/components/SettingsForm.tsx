@@ -196,10 +196,10 @@ interface SelectableSettingProps {
     onRemoval?: () => void;
 }
 
-function huansohn(input: string){
+function presetSelection(input: string){
+    if (input === "No preset"){""}
     if (input === "Sound effects") { return "^-?[.+]$|^[♪♬#～〜]+$" }
-    if (input === "No preset"){return ""}
-    if (input === "furigana"){return "insert furigana"}
+    if (input === "furigana"){return '(?<![一-龯ぁ-ゟ゠-ヿ])(|（(?![^一-龯ぁ-ゟ゠-ヿ]))[^)）](?:)|）'}
 
 }
 
@@ -2431,30 +2431,28 @@ export default function SettingsForm({
                                 label={t('settings.regexPreset')}
                                 select
                                 fullWidth
+                                defaultValue={'No preset'}
                                 value={regexPreset}
                                 color="primary"
-                                onChange={(event) =>
-                                    handleSettingChanged('regexPreset', event.target.value)
-                                }
+                                onChange={(event) => handleSettingChanged('regexPreset', event.target.value)}
                             >
                                 {regexPresets.map((s) => (
                                     <MenuItem key={s} value={s}>
                                         {s}
                                     </MenuItem>
                                 ))}
-
-                                </TextField>
+                            </TextField>
                             <TextField
                                 label={t('settings.subtitleRegexFilter')}
                                 fullWidth
-                                value={huansohn(regexPreset)}
+                                value={presetSelection(regexPreset)}
                                 color="primary"
+                                hiddenLabel={true}
                                 error={!validRegex}
                                 helperText={validRegex ? undefined : 'Invalid regular expression'}
                                 onChange={(event) => handleSettingChanged('subtitleRegexFilter', event.target.value)}
                             />
                             <TextField
-
                                 label={t('settings.subtitleRegexFilterTextReplacement')}
                                 fullWidth
                                 value={subtitleRegexFilterTextReplacement}
@@ -2464,12 +2462,11 @@ export default function SettingsForm({
                                 }
                             >
                                 {regexPresets.map((s) => (
-                                    <MenuItem key={s} value={s}>      
+                                    <MenuItem key={s} value={s}>
                                         {s}
                                     </MenuItem>
                                 ))}
-
-                                </TextField>
+                            </TextField>
                             <TextField
                                 select
                                 label={t('settings.language')}
@@ -2478,7 +2475,7 @@ export default function SettingsForm({
                                 onChange={(event) => handleSettingChanged('language', event.target.value)} //this is where the menu is that I need to change
                             >
                                 {supportedLanguages.map((s) => (
-                                    <MenuItem key={s} value={s}>      
+                                    <MenuItem key={s} value={s}>
                                         {s}
                                     </MenuItem>
                                 ))}
